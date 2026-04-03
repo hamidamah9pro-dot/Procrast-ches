@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Procrastâches</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+    <h1>Procrastâches</h1>
+
+
+    <div class="form-box">
+        <h2>Connexion</h2>
+        <form id="form">
+            <input type="text" name="username" id="username" placeholder="Nom utilisateur" required>
+            <input type="password" name="password" id="password" placeholder="Mot de passe" required>
+            <button type="submit">Se connecter</button>
+        </form>
+    </div>
+     <p>Pas de compte ?</p><a href="./index.html"> Inscris-toi !</a>
+</div>
+<script>
+    async function connexion() {
+    const form = document.getElementById("form");
+    form.addEventListener("submit", async function (e) {
+        e.preventDefault();
+        const nom = document.getElementById("username").value;
+        const pass = document.getElementById("password").value;
+
+        const data = { nom, pass };
+        try{
+            const send = await fetch("../backend/login.php", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(data)
+        });
+        if (!send.ok){
+            const errorText = await send.text()
+            console.error("Erreur serveur :", errorText);
+            return;
+        }
+        const rep = await send.json();
+        console.log("Reponse du serveur :", rep);
+
+        if (rep.success){
+            setTimeout(() => {
+                window.location.href = "dashboard.html"
+            }, 2000);
+           
+        }
+        else{
+            alert(rep.message);
+        }
+        } catch (error){
+            console.error("Erreur lors de la requête :", error);
+        }
+    });
+}
+connexion();
+</script>
+</body>
+</html>

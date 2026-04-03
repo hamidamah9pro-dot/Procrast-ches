@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard - Procrastâches</title>
+    <link rel="stylesheet" href="styledash.css">
+</head>
+<body>
+
+<div class="app">
+    <header>
+        <h1>Procrastâches</h1>
+        <button class="logout" onclick="location.href='../backend/logout.php'" >Déconnexion</button>
+    </header>
+
+    <div class="add-task">
+        <form id="form">
+            <input type="text" id="contenu" name="title" placeholder="Ajouter une tâche..." required>
+            <button onclick="insertion()">+</button>
+        </form>
+    </div>
+
+    <!-- TASK LIST -->
+    <div class="task-list" id="tasklist">
+
+    </div>
+
+</div>
+<script>
+    function afficherTaches(tasks) {
+        const listeUl = document.getElementById("tasklist");
+        listeUl.innerHTML = ""; // On vide pour éviter les doublons
+
+        tasks.forEach(tache => {
+            const li = document.createElement("li");
+            li.classList = "task-card";
+            li.innerHTML = `
+                <span>${tache.title}</span>
+                <button onclick="supprimerTache(${tache.id})">❌</button>
+            `;
+            listeUl.appendChild(li);
+        });
+}
+async function supprimerTache(id) {
+    if (!confirm("Supprimer cette tâche ?")) return; // Petite sécurité
+
+    try {
+        const response = await fetch("../backend/delete.php", {
+            method: "DELETE", // On utilise la méthode DELETE
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id: id }) // On envoie l'ID à supprimer
+        });
+
+        const rep = await response.json();
+
+        if (rep.success) {
+            // On réutilise ta fonction d'affichage avec la nouvelle liste
+            afficherTaches(rep.tasks); 
+        }
+    } catch (error) {
+        console.error("Erreur suppression :", error);
+    }
+}
+async function chargerTaches() {
+    try {
+        const response = await fetch("../backend/taches.php"); // Requête simple
+        const rep = await response.json();
+        
+        if (rep.success) {
+            afficherTaches(rep.tasks); // On utilise notre fonction d'affichage
+        }
+    } catch (error) {
+        console.error("Erreur au chargement :", error);
+    }
+}
+
+// Appel de la fonction dès que la page est prête
+window.addEventListener("DOMContentLoaded", chargerTaches);
+    async function insertion() {
+        const form = document.getElementById("form");
+    form.addEventListener("submit", async function (e) {
+        e.preventDefault();
+        const contenu = document.getElementById("contenu").value;
+        const data = { contenu: contenu };
+        try{
+            const send = await fetch("../backend/taches.php", {
+            method: "POST",
+            headers: { "Content-Type" : "application/json"},
+            body: JSON.stringify(data)
+        });
+        const rep = await send.json();
+        console.log(rep);
+        if (rep.success){
+            alert("Tâche ajoutée !");
+            afficherTaches(rep.tasks);
+            document.getElementById("contenu").value = "";
+        }
+        }
+       catch (error) {
+            console.error("Erreur lors de l'insertion :", error);
+        } 
+    })
+
+    }
+</script>
+</body>
+</html>

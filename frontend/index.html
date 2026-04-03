@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Procrastâches</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+    <h1>Procrastâches</h1>
+
+
+    <div class="form-box">
+        <h2>Inscription</h2>
+        <form id="form">
+            <input type="text" name="username" id="username" placeholder="Nom utilisateur" required>
+            <input type="password" name="password" id="password" placeholder="Mot de passe" required>
+            <button type="submit">Créer un compte</button>
+        </form>
+        <a href="./login.html">Connecte-toi ici !</a>
+    </div>
+</div>
+<script>
+    async function inscription() {
+    const form = document.getElementById("form");
+    
+    form.addEventListener("submit", async function(e){
+        e.preventDefault();
+
+        const nom = document.getElementById("username").value;
+        const pass = document.getElementById("password").value;
+
+        const data = { nom, pass };
+
+        try {
+            const send = await fetch("../backend/register.php", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(data)
+            });
+
+            // Si le serveur renvoie une erreur (404, 500...), on ne tente pas de parser le JSON
+            if (!send.ok) {
+                const errorText = await send.text(); // On lit le texte de l'erreur pour débugger
+                console.error("Erreur serveur :", errorText);
+                return;
+            }
+
+            const rep = await send.json();
+            console.log("Réponse du serveur :", rep);
+
+        } catch (error) {
+            console.error("Erreur lors de la requête :", error);
+        }
+    });
+}
+inscription();
+</script>
+</body>
+</html>
